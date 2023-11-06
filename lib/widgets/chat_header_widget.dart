@@ -1,10 +1,15 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:ant_pay_merchant/constants/app_images.dart';
+import 'package:ant_pay_merchant/helpers/common.dart';
+import 'package:ant_pay_merchant/providers/user_controller.dart';
+import 'package:ant_pay_merchant/screens/notifications.dart';
+import 'package:ant_pay_merchant/screens/profile.dart';
 import 'package:ant_pay_merchant/services/http.service.dart';
 import 'package:ant_pay_merchant/widgets/custom_text.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ChatHeaderWidget extends StatefulWidget {
   //final List<User> users;
@@ -34,51 +39,59 @@ class _ChatHeaderWidgetState extends State<ChatHeaderWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => Container(
-        width: double.infinity,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 15,
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(
-                          Icons.search,
-                          color: Colors.white,
-                        ),
-                        alignment: Alignment.bottomRight,
+  Widget build(BuildContext context) {
+    UserController userController = Provider.of<UserController>(context);
+    return Container(
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 15,
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {},
+                      icon: Icon(
+                        Icons.search,
+                        color: Colors.white,
                       ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(
-                          Icons.notifications,
-                          color: Colors.white,
-                        ),
-                        alignment: Alignment.bottomLeft,
-                      ),
-                    ],
-                  ),
-                  Text(
-                    'Chats',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
+                      alignment: Alignment.bottomRight,
                     ),
+                    IconButton(
+                      onPressed: () {
+                        changeScreen(context, Notifications());
+                      },
+                      icon: Icon(
+                        Icons.notifications,
+                        color: Colors.white,
+                      ),
+                      alignment: Alignment.bottomLeft,
+                    ),
+                  ],
+                ),
+                Text(
+                  'Chats',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
                   ),
-                  SizedBox(
-                    width: 16,
-                  ),
-                  Container(
+                ),
+                SizedBox(
+                  width: 16,
+                ),
+                InkWell(
+                  onTap: () {
+                    changeScreen(context, UserProfile());
+                  },
+                  child: Container(
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
@@ -95,12 +108,13 @@ class _ChatHeaderWidgetState extends State<ChatHeaderWidget> {
                           image: DecorationImage(
                               image: AssetImage(user), fit: BoxFit.cover)),
                     ),
-                  )
-                ],
-              ),
+                  ),
+                )
+              ],
             ),
-            SizedBox(height: 12),
-            Container(
+          ),
+          SizedBox(height: 12),
+          /*Container(
               height: 75,
               child: ListView.builder(
                 physics: BouncingScrollPhysics(),
@@ -160,11 +174,12 @@ class _ChatHeaderWidgetState extends State<ChatHeaderWidget> {
                   );
                 },
               ),
-            ),
-            SizedBox(
+            ),*/
+          /*SizedBox(
               height: 15,
-            )
-          ],
-        ),
-      );
+            )*/
+        ],
+      ),
+    );
+  }
 }

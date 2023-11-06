@@ -2,8 +2,9 @@
 
 class Api {
   static String get baseUrl {
-    return "https://232482fb4943c6d0.api-us.cometchat.io/v3";
+    return "https://antpay.com.ng/api";
   }
 
-  static const createUser = "/users";
+  static const register = "/auth/register";
+  static const login = "/auth/login";
 }

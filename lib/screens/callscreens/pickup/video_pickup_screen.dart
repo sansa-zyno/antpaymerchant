@@ -1,4 +1,4 @@
-import 'package:ant_pay_merchant/utils/permissions.dart';
+/*import 'package:ant_pay_merchant/utils/permissions.dart';
 import 'package:ant_pay_merchant/widgets/cached_image.dart';
 import 'package:flutter/material.dart';
 import 'package:ant_pay_merchant/models/call.dart';
@@ -100,4 +100,4 @@ class _VideoPickupScreenState extends State<VideoPickupScreen> {
       ),
     );
   }
-}
+}*/

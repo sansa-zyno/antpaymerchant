@@ -9,6 +9,7 @@ class OurUser {
   String? bio;
   Timestamp? accountCreated;
   String? lastActive;
+  bool? isReadyForTxn;
 
   OurUser(
       {this.accountCreated,
@@ -18,7 +19,8 @@ class OurUser {
       this.country,
       this.displayName,
       this.bio,
-      this.lastActive});
+      this.lastActive,
+      this.isReadyForTxn});
 
   /*factory OurUser.fromFireStore(DocumentSnapshot _data) {
     return OurUser(

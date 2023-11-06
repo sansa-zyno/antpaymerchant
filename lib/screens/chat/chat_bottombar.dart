@@ -1,17 +1,14 @@
-import 'dart:developer';
-import 'dart:io';
 import 'package:ant_pay_merchant/constants/app_colors.dart';
 import 'package:ant_pay_merchant/constants/app_images.dart';
 import 'package:ant_pay_merchant/providers/app_provider.dart';
 import 'package:ant_pay_merchant/services/http.service.dart';
 import 'package:ant_pay_merchant/widgets/custom_text.dart';
 import 'package:cometchat/cometchat_sdk.dart';
-import 'package:cometchat/models/user.dart';
-import 'package:dio/dio.dart';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 
 String stickerVal = "";
 
@@ -28,10 +25,11 @@ class ChatBottomBar extends StatefulWidget {
 
 class _ChatBottomBarState extends State<ChatBottomBar> {
   TextEditingController messageTextEdittingController = TextEditingController();
-  //PlatformFile? file;
+  PlatformFile? file;
   XFile? image;
   late AppProvider appProvider;
   bool showsticker = false;
+  bool typing = false;
 
   Future addTextMessage() async {
     if (messageTextEdittingController.text != "") {
@@ -65,90 +63,77 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
     }
   }
 
-  Future addImageMessage(bool sticker) async {
-    if (!sticker) {
-      image = await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        MediaMessage mediaMessage = MediaMessage(
-            receiverType: ConversationType.user,
-            type: CometChatMessageType.image,
-            receiverUid: (widget.conversationWith as User).uid,
-            file: image!.path);
+  Future addImageMessage({required ImageSource source}) async {
+    image = await ImagePicker().pickImage(source: source);
+    if (image != null) {
+      MediaMessage mediaMessage = MediaMessage(
+          receiverType: ConversationType.user,
+          type: CometChatMessageType.image,
+          receiverUid: (widget.conversationWith as User).uid,
+          file: image!.path);
 
-        await CometChat.sendMediaMessage(mediaMessage,
-            onSuccess: (MediaMessage message) {
-          debugPrint(
-              "Media message sent successfully:${mediaMessage.metadata}");
-        }, onError: (e) {
-          debugPrint(
-              "Media message sending failed with exception: ${e.message}");
-        });
-      }
-    } else {
-      if (stickerVal != "") {
-        MediaMessage mediaMessage = MediaMessage(
-            receiverType: ConversationType.user,
-            type: CometChatMessageType.image,
-            receiverUid: (widget.conversationWith as User).uid,
-            file: null);
-
-        String fileUrl = stickerVal;
-        String fileName = "test";
-        String fileExtension = "png";
-        String fileMimeType = "image/png";
-
-        Attachment attach =
-            Attachment(fileUrl, fileName, fileExtension, fileMimeType, null);
-        mediaMessage.attachment = attach;
-
-        await CometChat.sendMediaMessage(mediaMessage,
-            onSuccess: (MediaMessage message) {
-          debugPrint(
-              "Media message sent successfully:${mediaMessage.metadata}");
-        }, onError: (e) {
-          debugPrint(
-              "Media message sending failed with exception: ${e.message}");
-        });
-      }
+      await CometChat.sendMediaMessage(mediaMessage,
+          onSuccess: (MediaMessage message) {
+        debugPrint("Media message sent successfully:${mediaMessage.metadata}");
+      }, onError: (e) {
+        debugPrint("Media message sending failed with exception: ${e.message}");
+      });
     }
   }
 
-  Future addImageMessageToGroup(bool sticker) async {
-    if (!sticker) {
-      image = await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        MediaMessage mediaMessage = MediaMessage(
-            receiverType: ConversationType.group,
-            type: CometChatMessageType.image,
-            receiverUid: (widget.conversationWith as Group).guid,
-            file: image!.path);
+  Future addImageMessageToGroup({required ImageSource source}) async {
+    image = await ImagePicker().pickImage(source: source);
+    if (image != null) {
+      MediaMessage mediaMessage = MediaMessage(
+          receiverType: ConversationType.group,
+          type: CometChatMessageType.image,
+          receiverUid: (widget.conversationWith as Group).guid,
+          file: image!.path);
 
-        await CometChat.sendMediaMessage(mediaMessage,
-            onSuccess: (MediaMessage message) {
-          debugPrint(
-              "Media message sent successfully:${mediaMessage.metadata}");
-        }, onError: (e) {
-          debugPrint(
-              "Media message sending failed with exception: ${e.message}");
-        });
-      }
-    } else {
-      showsticker = false;
-      setState(() {});
-      /* MediaMessage mediaMessage = MediaMessage(
-            receiverType: ConversationType.group,
-            type: CometChatMessageType.image,
-            receiverUid: (widget.conversationWith as Group).guid,
-            file: stickerVal);
+      await CometChat.sendMediaMessage(mediaMessage,
+          onSuccess: (MediaMessage message) {
+        debugPrint("Media message sent successfully:${mediaMessage.metadata}");
+      }, onError: (e) {
+        debugPrint("Media message sending failed with exception: ${e.message}");
+      });
+    }
+  }
 
-        await CometChat.sendMediaMessage(mediaMessage,
-            onSuccess: (MediaMessage message) {
-          debugPrint(
-              "Media message sent successfully:${mediaMessage.metadata}");
-        }, onError: (e) {
-          debugPrint(
-              "Media message sending failed with exception: ${e.message}");
-        });*/
+  Future addDocMessage() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    if (result != null) {
+      file = result.files.single;
+      MediaMessage mediaMessage = MediaMessage(
+          receiverType: ConversationType.user,
+          type: CometChatMessageType.image,
+          receiverUid: (widget.conversationWith as User).uid,
+          file: file!.path);
+
+      await CometChat.sendMediaMessage(mediaMessage,
+          onSuccess: (MediaMessage message) {
+        debugPrint("Media message sent successfully:${mediaMessage.metadata}");
+      }, onError: (e) {
+        debugPrint("Media message sending failed with exception: ${e.message}");
+      });
+    }
+  }
+
+  Future addDocMessageToGroup() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    if (result != null) {
+      file = result.files.single;
+      MediaMessage mediaMessage = MediaMessage(
+          receiverType: ConversationType.group,
+          type: CometChatMessageType.image,
+          receiverUid: (widget.conversationWith as Group).guid,
+          file: file!.path);
+
+      await CometChat.sendMediaMessage(mediaMessage,
+          onSuccess: (MediaMessage message) {
+        debugPrint("Media message sent successfully:${mediaMessage.metadata}");
+      }, onError: (e) {
+        debugPrint("Media message sending failed with exception: ${e.message}");
+      });
     }
   }
 
@@ -156,6 +141,15 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    messageTextEdittingController.addListener(() {
+      if (messageTextEdittingController.text.isNotEmpty) {
+        typing = true;
+        setState(() {});
+      } else {
+        typing = false;
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -308,15 +302,15 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
                 children: [
                   InkWell(
                       onTap: () {
-                        showsticker = !showsticker;
-                        setState(() {});
-                        /*showModalBottomSheet(
+                        showModalBottomSheet(
                             context: context,
-                            builder: (context) => StickerWidget(),
+                            builder: (context) => buildsheet(),
+                            backgroundColor: Colors.transparent,
                             isScrollControlled: true,
+                            isDismissible: false,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(15))));*/
+                                    top: Radius.circular(15))));
                       },
                       child: Icon(Icons.add,
                           color: showsticker ? appColor : Color(0xffADFFE1))),
@@ -349,56 +343,12 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
                         suffixIcon: IconButton(
                           padding: EdgeInsets.all(0),
                           onPressed: () {
-                            if (!showsticker) {
-                              widget.type == ConversationType.user
-                                  ? addTextMessage().then((value) {
-                                      appProvider.getChatData(
-                                          (widget.conversationWith as User).uid,
-                                          ConversationType.user,
-                                          false);
-                                      Future.delayed(Duration(seconds: 1), () {
-                                        appProvider.conversationData();
-                                      });
-                                    })
-                                  : addTextMessageToGroup().then((value) {
-                                      appProvider.getChatData(
-                                          (widget.conversationWith as Group)
-                                              .guid,
-                                          ConversationType.group,
-                                          false);
-                                      Future.delayed(Duration(seconds: 1), () {
-                                        appProvider.conversationData();
-                                      });
-                                    });
-                              appProvider.updateVal("", "", false, "", "");
-                            } else {
-                              widget.type == ConversationType.user
-                                  ? addImageMessage(true).then((value) {
-                                      appProvider.getChatData(
-                                          (widget.conversationWith as User).uid,
-                                          ConversationType.user,
-                                          false);
-                                      Future.delayed(Duration(seconds: 1), () {
-                                        appProvider.conversationData();
-                                      });
-                                    })
-                                  : addImageMessageToGroup(true).then((value) {
-                                      appProvider.getChatData(
-                                          (widget.conversationWith as Group)
-                                              .guid,
-                                          ConversationType.group,
-                                          false);
-                                      Future.delayed(Duration(seconds: 1), () {
-                                        appProvider.conversationData();
-                                      });
-                                    });
-                              appProvider.updateVal("", "", false, "", "");
-                            }
+                            showsticker = !showsticker;
+                            setState(() {});
                           },
                           icon: Icon(
-                            //Icons.file_open_rounded,
-                            Icons.send,
-                            color: Colors.purple,
+                            Icons.sticky_note_2_rounded,
+                            color: showsticker ? appColor : Colors.grey,
                           ),
                         ),
                       ),
@@ -407,52 +357,292 @@ class _ChatBottomBarState extends State<ChatBottomBar> {
                   SizedBox(
                     width: 15,
                   ),
-                  InkWell(
-                      onTap: () {
-                        widget.type == ConversationType.user
-                            ? addImageMessage(false).then((value) {
-                                appProvider.getChatData(
-                                    (widget.conversationWith as User).uid,
-                                    ConversationType.user,
-                                    false);
-                                Future.delayed(Duration(seconds: 1), () {
-                                  appProvider.conversationData();
-                                });
-                              })
-                            : addImageMessageToGroup(false).then((value) {
-                                appProvider.getChatData(
-                                    (widget.conversationWith as Group).guid,
-                                    ConversationType.group,
-                                    false);
-                                Future.delayed(Duration(seconds: 1), () {
-                                  appProvider.conversationData();
-                                });
-                              });
-                        appProvider.updateVal("", "", false, "", "");
-                      },
-                      child: Icon(Icons.photo_camera,
-                          color: showsticker ? appColor : Color(0xffADFFE1))),
-                  SizedBox(
-                    width: 15,
-                  ),
-                  Icon(Icons.mic,
-                      color: showsticker ? appColor : Color(0xffADFFE1)),
+                  !typing
+                      ? Row(
+                          children: [
+                            InkWell(
+                                onTap: () {
+                                  widget.type == ConversationType.user
+                                      ? addImageMessage(
+                                              source: ImageSource.camera)
+                                          .then((value) {
+                                          appProvider.getChatData(
+                                              (widget.conversationWith as User)
+                                                  .uid,
+                                              ConversationType.user,
+                                              false);
+                                          Future.delayed(Duration(seconds: 1),
+                                              () {
+                                            appProvider.conversationData();
+                                          });
+                                        })
+                                      : addImageMessageToGroup(
+                                              source: ImageSource.camera)
+                                          .then((value) {
+                                          appProvider.getChatData(
+                                              (widget.conversationWith as Group)
+                                                  .guid,
+                                              ConversationType.group,
+                                              false);
+                                          Future.delayed(Duration(seconds: 1),
+                                              () {
+                                            appProvider.conversationData();
+                                          });
+                                        });
+                                  appProvider.updateVal("", "", false, "", "");
+                                },
+                                child: Icon(Icons.photo_camera,
+                                    color: showsticker
+                                        ? appColor
+                                        : Color(0xffADFFE1))),
+                            SizedBox(
+                              width: 15,
+                            ),
+                            Icon(Icons.mic,
+                                color:
+                                    showsticker ? appColor : Color(0xffADFFE1)),
+                          ],
+                        )
+                      : InkWell(
+                          onTap: () {
+                            widget.type == ConversationType.user
+                                ? addTextMessage().then((value) {
+                                    appProvider.getChatData(
+                                        (widget.conversationWith as User).uid,
+                                        ConversationType.user,
+                                        false);
+                                    Future.delayed(Duration(seconds: 1), () {
+                                      appProvider.conversationData();
+                                    });
+                                  })
+                                : addTextMessageToGroup().then((value) {
+                                    appProvider.getChatData(
+                                        (widget.conversationWith as Group).guid,
+                                        ConversationType.group,
+                                        false);
+                                    Future.delayed(Duration(seconds: 1), () {
+                                      appProvider.conversationData();
+                                    });
+                                  });
+                            appProvider.updateVal("", "", false, "", "");
+                          },
+                          child: Icon(Icons.send, color: Color(0xffADFFE1))),
                 ],
               ),
             ),
             SizedBox(
               height: 15,
             ),
-            Visibility(visible: showsticker, child: StickerWidget())
+            Visibility(
+                visible: showsticker,
+                child: StickerWidget(
+                  conversationWith: widget.conversationWith,
+                  type: widget.type,
+                ))
           ],
         ),
       ),
     );
   }
+
+  Widget buildsheet() => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            margin: EdgeInsets.only(right: 15, left: 3),
+            decoration: BoxDecoration(
+                color: Colors.white, borderRadius: BorderRadius.circular(15)),
+            child: Column(
+              children: [
+                ListTile(
+                  onTap: () {
+                    widget.type == ConversationType.user
+                        ? addImageMessage(source: ImageSource.camera)
+                            .then((value) {
+                            appProvider.getChatData(
+                                (widget.conversationWith as User).uid,
+                                ConversationType.user,
+                                false);
+                            Future.delayed(Duration(seconds: 1), () {
+                              appProvider.conversationData();
+                            });
+                          })
+                        : addImageMessageToGroup(source: ImageSource.camera)
+                            .then((value) {
+                            appProvider.getChatData(
+                                (widget.conversationWith as Group).guid,
+                                ConversationType.group,
+                                false);
+                            Future.delayed(Duration(seconds: 1), () {
+                              appProvider.conversationData();
+                            });
+                          });
+                    appProvider.updateVal("", "", false, "", "");
+                  },
+                  leading: Icon(
+                    Icons.photo_camera,
+                    color: appColor,
+                  ),
+                  title: CustomText(
+                    text: "Camera",
+                    size: 16,
+                    weight: FontWeight.bold,
+                  ),
+                  visualDensity: VisualDensity(horizontal: 0, vertical: -4),
+                ),
+                Divider(),
+                ListTile(
+                  onTap: () {
+                    widget.type == ConversationType.user
+                        ? addImageMessage(source: ImageSource.gallery)
+                            .then((value) {
+                            appProvider.getChatData(
+                                (widget.conversationWith as User).uid,
+                                ConversationType.user,
+                                false);
+                            Future.delayed(Duration(seconds: 1), () {
+                              appProvider.conversationData();
+                            });
+                          })
+                        : addImageMessageToGroup(source: ImageSource.gallery)
+                            .then((value) {
+                            appProvider.getChatData(
+                                (widget.conversationWith as Group).guid,
+                                ConversationType.group,
+                                false);
+                            Future.delayed(Duration(seconds: 1), () {
+                              appProvider.conversationData();
+                            });
+                          });
+                    appProvider.updateVal("", "", false, "", "");
+                  },
+                  leading: Icon(
+                    Icons.image,
+                    color: appColor,
+                  ),
+                  title: CustomText(
+                    text: "Photo & Video Libary",
+                    size: 16,
+                    weight: FontWeight.bold,
+                  ),
+                  visualDensity: VisualDensity(horizontal: 0, vertical: -4),
+                ),
+                Divider(),
+                ListTile(
+                  onTap: () {
+                    widget.type == ConversationType.user
+                        ? addDocMessage().then((value) {
+                            appProvider.getChatData(
+                                (widget.conversationWith as User).uid,
+                                ConversationType.user,
+                                false);
+                            Future.delayed(Duration(seconds: 1), () {
+                              appProvider.conversationData();
+                            });
+                          })
+                        : addDocMessageToGroup().then((value) {
+                            appProvider.getChatData(
+                                (widget.conversationWith as Group).guid,
+                                ConversationType.group,
+                                false);
+                            Future.delayed(Duration(seconds: 1), () {
+                              appProvider.conversationData();
+                            });
+                          });
+                    appProvider.updateVal("", "", false, "", "");
+                  },
+                  leading: Icon(
+                    Icons.file_open_rounded,
+                    color: appColor,
+                  ),
+                  title: CustomText(
+                    text: "Document",
+                    size: 16,
+                    weight: FontWeight.bold,
+                  ),
+                  visualDensity: VisualDensity(horizontal: 0, vertical: -4),
+                ),
+                Divider(),
+                ListTile(
+                  leading: Icon(
+                    Icons.location_on,
+                    color: appColor,
+                  ),
+                  title: CustomText(
+                    text: "Location",
+                    size: 16,
+                    weight: FontWeight.bold,
+                  ),
+                  visualDensity: VisualDensity(horizontal: 0, vertical: -4),
+                ),
+                Divider(),
+                ListTile(
+                  leading: Icon(
+                    Icons.person_3_rounded,
+                    color: appColor,
+                  ),
+                  title: CustomText(
+                    text: "Contact",
+                    size: 16,
+                    weight: FontWeight.bold,
+                  ),
+                  visualDensity: VisualDensity(horizontal: 0, vertical: -4),
+                ),
+                /*Divider(),
+                ListTile(
+                  leading: Icon(
+                    Icons.bar_chart,
+                    color: appColor,
+                  ),
+                  title: CustomText(
+                    text: "Poll",
+                    size: 16,
+                    weight: FontWeight.bold,
+                  ),
+                  visualDensity: VisualDensity(horizontal: 0, vertical: -4),
+                ),*/
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 8,
+          ),
+          InkWell(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: Container(
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15)),
+                padding: EdgeInsets.all(15),
+                margin: EdgeInsets.only(right: 15, left: 3),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CustomText(
+                      text: "Cancel",
+                      color: appColor,
+                      size: 16,
+                      weight: FontWeight.bold,
+                    )
+                  ],
+                )),
+          ),
+          SizedBox(
+            height: 8,
+          ),
+        ],
+      );
 }
 
 class StickerWidget extends StatefulWidget {
-  const StickerWidget({Key? key}) : super(key: key);
+  final AppEntity conversationWith;
+  final String type;
+  const StickerWidget(
+      {Key? key, required this.conversationWith, required this.type})
+      : super(key: key);
 
   @override
   State<StickerWidget> createState() => _StickerWidgetState();
@@ -462,17 +652,48 @@ class _StickerWidgetState extends State<StickerWidget>
     with SingleTickerProviderStateMixin {
   int idx = -1;
   late TabController controller;
-  /*List usdStickers = [
-    sticker1,
-    sticker2,
-    sticker03,
-    sticker4,
-    sticker5,
-    sticker6,
-    sticker7,
-    sticker8,
-    sticker9
-  ];*/
+  Future sendStickerToUser() async {
+    if (stickerVal != "") {
+      MediaMessage mediaMessage = MediaMessage(
+          receiverType: ConversationType.user,
+          type: CometChatMessageType.image,
+          receiverUid: (widget.conversationWith as User).uid,
+          file: null);
+
+      String fileUrl = stickerVal;
+      String fileName = "test";
+      String fileExtension = "png";
+      String fileMimeType = "image/png";
+
+      Attachment attach =
+          Attachment(fileUrl, fileName, fileExtension, fileMimeType, null);
+      mediaMessage.attachment = attach;
+
+      await CometChat.sendMediaMessage(mediaMessage,
+          onSuccess: (MediaMessage message) {
+        debugPrint("Media message sent successfully:${mediaMessage.metadata}");
+      }, onError: (e) {
+        debugPrint("Media message sending failed with exception: ${e.message}");
+      });
+    }
+  }
+
+  Future sendStickerToGroup() async {
+    /* MediaMessage mediaMessage = MediaMessage(
+            receiverType: ConversationType.group,
+            type: CometChatMessageType.image,
+            receiverUid: (widget.conversationWith as Group).guid,
+            file: stickerVal);
+
+        await CometChat.sendMediaMessage(mediaMessage,
+            onSuccess: (MediaMessage message) {
+          debugPrint(
+              "Media message sent successfully:${mediaMessage.metadata}");
+        }, onError: (e) {
+          debugPrint(
+              "Media message sending failed with exception: ${e.message}");
+        });*/
+  }
   @override
   void initState() {
     // TODO: implement initState
@@ -603,15 +824,39 @@ class _StickerWidgetState extends State<StickerWidget>
                             InkWell(
                                 onTap: () {
                                   stickerVal = appProvider.stickers![index];
-                                  idx = index;
+                                  //idx = index;
                                   setState(() {});
+                                  widget.type == ConversationType.user
+                                      ? sendStickerToUser().then((value) {
+                                          appProvider.getChatData(
+                                              (widget.conversationWith as User)
+                                                  .uid,
+                                              ConversationType.user,
+                                              false);
+                                          Future.delayed(Duration(seconds: 1),
+                                              () {
+                                            appProvider.conversationData();
+                                          });
+                                        })
+                                      : sendStickerToGroup().then((value) {
+                                          appProvider.getChatData(
+                                              (widget.conversationWith as Group)
+                                                  .guid,
+                                              ConversationType.group,
+                                              false);
+                                          Future.delayed(Duration(seconds: 1),
+                                              () {
+                                            appProvider.conversationData();
+                                          });
+                                        });
+                                  appProvider.updateVal("", "", false, "", "");
                                 },
                                 child: Stack(
                                   children: [
                                     Image.network(
                                       appProvider.stickers![index],
                                     ),
-                                    Visibility(
+                                    /* Visibility(
                                       visible: index == idx,
                                       child: Positioned(
                                           top: 0,
@@ -621,7 +866,7 @@ class _StickerWidgetState extends State<StickerWidget>
                                             backgroundColor: Colors.white,
                                             child: Icon(Icons.check),
                                           )),
-                                    )
+                                    )*/
                                   ],
                                 )),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

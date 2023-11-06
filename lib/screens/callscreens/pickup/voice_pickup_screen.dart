@@ -1,4 +1,4 @@
-import 'package:ant_pay_merchant/screens/callscreens/voice_call_screen.dart';
+/*import 'package:ant_pay_merchant/screens/callscreens/voice_call_screen.dart';
 import 'package:ant_pay_merchant/services/call_methods.dart';
 import 'package:ant_pay_merchant/utils/permissions.dart';
 import 'package:ant_pay_merchant/widgets/cached_image.dart';
@@ -101,4 +101,4 @@ class _VoicePickupScreenState extends State<VoicePickupScreen> {
       ),
     );
   }
-}
+}*/

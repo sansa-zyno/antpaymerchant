@@ -1,4 +1,4 @@
-import 'package:ant_pay_merchant/constants/app_colors.dart';
+/*import 'package:ant_pay_merchant/constants/app_colors.dart';
 import 'package:ant_pay_merchant/constants/app_images.dart';
 import 'package:ant_pay_merchant/helpers/common.dart';
 import 'package:ant_pay_merchant/providers/app_provider.dart';
@@ -227,4 +227,4 @@ class _ContactListState extends State<ContactList> {
           )),
     );
   }
-}
+}*/

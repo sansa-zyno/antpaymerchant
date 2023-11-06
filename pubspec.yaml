@@ -84,6 +84,10 @@ dependencies:
   font_awesome_flutter: ^10.1.0
   firebase_app_check: ^0.0.9+1
   toast: ^0.3.0
+  open_filex:
+  path_provider:
+  #random_string:
+  internet_connection_checker:
 
 dependency_overrides:
   shared_preferences_android: 2.0.10

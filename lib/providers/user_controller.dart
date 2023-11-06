@@ -1,19 +1,13 @@
 import 'dart:io';
-import 'package:ant_pay_merchant/screens/callscreens/pickup/video_pickup_screen.dart';
-import 'package:ant_pay_merchant/screens/callscreens/pickup/voice_pickup_screen.dart';
-import 'package:ant_pay_merchant/services/call_history.dart';
 import 'package:ant_pay_merchant/services/call_methods.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'dart:async';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:ant_pay_merchant/models/user.dart';
 import 'package:uuid/uuid.dart';
-
-import '../models/call.dart';
 
 class UserController with ChangeNotifier {
   OurUser _currentUser = OurUser();
@@ -60,7 +54,7 @@ class UserController with ChangeNotifier {
     }
 
     updatePostInFirestore({String? mediaUrl, String? uid}) async {
-      await FirebaseFirestore.instance.collection("users").doc(uid).update({
+      await FirebaseFirestore.instance.collection("merchants").doc(uid).update({
         "avatarUrl": mediaUrl,
       });
       await getCurrentUserInfo();
@@ -93,7 +87,7 @@ class UserController with ChangeNotifier {
   Future<bool> updateDisplay(String name) async {
     try {
       await _firestore
-          .collection("users")
+          .collection("merchants")
           .doc(auth.currentUser!.uid)
           .update({"displayName": name});
     } catch (e) {
@@ -105,7 +99,7 @@ class UserController with ChangeNotifier {
   Future<bool> updateBio(String bio) async {
     try {
       await _firestore
-          .collection("users")
+          .collection("merchants")
           .doc(auth.currentUser!.uid)
           .update({"bio": bio});
     } catch (e) {
@@ -117,7 +111,7 @@ class UserController with ChangeNotifier {
   Future<bool> updateCountry(String country) async {
     try {
       await _firestore
-          .collection("users")
+          .collection("merchants")
           .doc(auth.currentUser!.uid)
           .update({"country": country});
     } catch (e) {
@@ -130,7 +124,7 @@ class UserController with ChangeNotifier {
     try {
       if (auth.currentUser != null) {
         DocumentSnapshot _documentSnapshot = await _firestore
-            .collection("users")
+            .collection("merchants")
             .doc(auth.currentUser!.uid)
             .get();
         Map<String, dynamic> snapshotData =
@@ -143,6 +137,7 @@ class UserController with ChangeNotifier {
         _currentUser.displayName = snapshotData["displayName"];
         _currentUser.country = snapshotData["country"];
         _currentUser.lastActive = snapshotData["lastActive"];
+        _currentUser.isReadyForTxn = snapshotData["isReadyForTxn"];
         notifyListeners();
       } else {}
     } catch (e) {}

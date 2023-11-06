@@ -37,6 +37,86 @@ class _ChatScreenState extends State<ChatScreen> with MessageListener {
   @override
   void onTextMessageReceived(TextMessage textMessage) {
     debugPrint("Text message received successfully: $textMessage");
+
+    CometChat.markAsDelivered(textMessage, onSuccess: (String unused) {
+      debugPrint("markAsDelivered : $unused ");
+    }, onError: (CometChatException e) {
+      debugPrint("markAsDelivered unsuccessful : ${e.message} ");
+    });
+    CometChat.markAsRead(textMessage, onSuccess: (String unused) {
+      debugPrint("markAsRead : $unused ");
+    }, onError: (CometChatException e) {
+      debugPrint("markAsRead unsuccessfull : ${e.message} ");
+    });
+    widget.type == ConversationType.user
+        ? appProvider.getChatData(
+            textMessage.sender!.uid, ConversationType.user, false)
+        : appProvider.getChatData((widget.conversationWith as Group).guid,
+            ConversationType.group, false);
+  }
+
+  @override
+  void onMediaMessageReceived(MediaMessage mediaMessage) {
+    debugPrint("Media message received successfully: $mediaMessage");
+    CometChat.markAsDelivered(mediaMessage, onSuccess: (String unused) {
+      debugPrint("markAsDelivered : $unused ");
+    }, onError: (CometChatException e) {
+      debugPrint("markAsDelivered unsuccessful : ${e.message} ");
+    });
+    CometChat.markAsRead(mediaMessage, onSuccess: (String unused) {
+      debugPrint("markAsRead : $unused ");
+    }, onError: (CometChatException e) {
+      debugPrint("markAsRead unsuccessfull : ${e.message} ");
+    });
+    widget.type == ConversationType.user
+        ? appProvider.getChatData(
+            mediaMessage.sender!.uid, ConversationType.user, false)
+        : appProvider.getChatData((widget.conversationWith as Group).guid,
+            ConversationType.group, false);
+  }
+
+  @override
+  void onCustomMessageReceived(CustomMessage customMessage) {
+    debugPrint("Custom message received successfully: $customMessage");
+    CometChat.markAsDelivered(customMessage, onSuccess: (String unused) {
+      debugPrint("markAsDelivered : $unused ");
+    }, onError: (CometChatException e) {
+      debugPrint("markAsDelivered unsuccessful : ${e.message} ");
+    });
+    CometChat.markAsRead(customMessage, onSuccess: (String unused) {
+      debugPrint("markAsRead : $unused ");
+    }, onError: (CometChatException e) {
+      debugPrint("markAsRead unsuccessfull : ${e.message} ");
+    });
+    widget.type == ConversationType.user
+        ? appProvider.getChatData(
+            customMessage.sender!.uid, ConversationType.user, false)
+        : appProvider.getChatData((widget.conversationWith as Group).guid,
+            ConversationType.group, false);
+  }
+
+  @override
+  void onMessagesDelivered(MessageReceipt messageReceipt) {
+    // TODO: implement onMessagesDelivered
+    widget.type == ConversationType.user
+        ? appProvider.getChatData(
+            messageReceipt.sender.uid, ConversationType.user, false)
+        : appProvider.getChatData((widget.conversationWith as Group).guid,
+            ConversationType.group, false);
+  }
+
+  @override
+  void onMessagesRead(MessageReceipt messageReceipt) {
+    // TODO: implement onMessagesRead
+    widget.type == ConversationType.user
+        ? appProvider.getChatData(
+            messageReceipt.sender.uid, ConversationType.user, false)
+        : appProvider.getChatData((widget.conversationWith as Group).guid,
+            ConversationType.group, false);
+  }
+  /* @override
+  void onTextMessageReceived(TextMessage textMessage) {
+    debugPrint("Text message received successfully: $textMessage");
     if (textMessage.conversationId == widget.conversationId) {
       if (appProvider.chatData != null) {
         appProvider.addToChatData(textMessage);
@@ -71,7 +151,7 @@ class _ChatScreenState extends State<ChatScreen> with MessageListener {
         appProvider.chatData!.add(customMessage);
       }
     }
-  }
+  }*/
 
   @override
   void dispose() {

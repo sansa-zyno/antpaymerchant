@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:ant_pay_merchant/constants/api.dart';
 import 'package:ant_pay_merchant/constants/app_strings.dart';
 import 'package:ant_pay_merchant/helpers/common.dart';
 import 'package:ant_pay_merchant/providers/app_provider.dart';
@@ -7,10 +8,12 @@ import 'package:ant_pay_merchant/screens/auth/signup.dart';
 import 'package:ant_pay_merchant/screens/auth/verification.dart';
 import 'package:ant_pay_merchant/screens/home.dart';
 import 'package:ant_pay_merchant/screens/profile_setup.dart';
+import 'package:ant_pay_merchant/services/http.service.dart';
 import 'package:cometchat/cometchat_sdk.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Response;
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:page_transition/page_transition.dart';
@@ -31,13 +34,13 @@ class _AuthMainState extends State<AuthMain> {
   String? uid;
   late String _verificationId;
 
-  setStatusOnline() async {
+  /*setStatusOnline() async {
     final currentUser = FirebaseAuth.instance.currentUser;
     await FirebaseFirestore.instance
         .collection("users")
         .doc(currentUser!.uid)
         .update({"lastActive": "Online"});
-  }
+  }*/
 
   void _verifyOTP() async {
     log("verifyOTP method called now");
@@ -47,7 +50,7 @@ class _AuthMainState extends State<AuthMain> {
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithCredential(credential);
 
-      log("userCredential.user: ${userCredential.user}");
+      log("firebase user: ${userCredential.user}");
 
       if (FirebaseAuth.instance.currentUser != null) {
         log("inside the user not null");
@@ -81,7 +84,7 @@ class _AuthMainState extends State<AuthMain> {
     if (uid != null) {
       try {
         QuerySnapshot snap = await FirebaseFirestore.instance
-            .collection("users")
+            .collection("merchants")
             .where("uid", isEqualTo: uid)
             .get();
         log(snap.docs.length.toString());
@@ -91,6 +94,7 @@ class _AuthMainState extends State<AuthMain> {
           _currentUser.getCurrentUserInfo();
           //setStatusOnline();
           loginUser(uid!, context);
+          loginOnAntpay(context);
         } else {
           changeScreen(context, ProfileSetup(uid: uid!));
         }
@@ -230,6 +234,30 @@ class _AuthMainState extends State<AuthMain> {
             onpressed: _sendOTP,
             phone: _phoneNumber,
           );
+  }
+
+  loginOnAntpay(BuildContext context) async {
+    AppProvider appProvider = Provider.of<AppProvider>(context, listen: false);
+    log("log called");
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection("merchants")
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get();
+    if (doc["isReadyForTxn"]) {
+      Response response = await HttpService.post(Api.login, {
+        "email": doc["email"],
+        "password":
+            "${doc["firstname"] + "_${FirebaseAuth.instance.currentUser!.phoneNumber}"}",
+      });
+      Map result = response.data;
+      log(result.toString());
+      if (result["status"]) {
+        appProvider.setToken(result["data"]["token"]);
+      } else {
+        Get.defaultDialog(
+            title: "Error", middleText: "There was an error login user");
+      }
+    }
   }
 
   //Login User function must pass userid and authkey should be used only while developing

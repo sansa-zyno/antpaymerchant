@@ -24,7 +24,8 @@ class GradientButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ButtonStyle(
-          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+          shape: MaterialStateProperty.all(
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
           padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(0))),
       child: Ink(
         width: 283,

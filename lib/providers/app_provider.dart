@@ -30,6 +30,8 @@ class AppProvider extends ChangeNotifier {
   String dialcode = "+234";
   String countrySelected = "Nigeria";
 
+  String token = "";
+
   AppProvider() {
     getContacts();
   }
@@ -192,6 +194,11 @@ class AppProvider extends ChangeNotifier {
     } catch (e) {
       imageUrl = "";
     }
+    notifyListeners();
+  }
+
+  setToken(String token) {
+    this.token = token;
     notifyListeners();
   }
 }

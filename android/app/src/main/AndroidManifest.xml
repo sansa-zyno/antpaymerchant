@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.ant_pay_merchant">
+    package="com.ant_pay_merchant.www">
    <application
         android:label="ant_pay_merchant"
         android:name="${applicationName}"
